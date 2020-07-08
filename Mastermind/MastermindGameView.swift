@@ -11,18 +11,16 @@ struct MastermindGameView: View {
     @ObservedObject var viewModel: MastermindGameIntVM
     
     var body: some View {
-        ZStack {
-            VStack {
-                Row(currentRow: viewModel.finalRow, isDark: true).disabled(true)
-                Spacer()
-            }
-            ScrollView {
+        VStack {
+            Row(currentRow: viewModel.finalRow, isDark: true).disabled(true)
+            ScrollView(showsIndicators: false) {
                 VStack(spacing: 10) {
                     ForEach(0..<viewModel.allRows.count, id: \.self) { index in
                         Row(currentRow: viewModel.allRows[index])
                     }
                 }
             }
+            SelectionBar(items: viewModel.options)
         }
     }
 }
@@ -32,11 +30,48 @@ struct ContentView_Previews: PreviewProvider {
         MastermindGameView(viewModel: MastermindGameIntVM(numberOfColumns: 4, numberOfRows: 10, options: [1, 2, 3, 4, 5, 6]))
     }
 }
+
+//MARK: - Selection Things
+
+struct SelectionBar: View {
+    let items: [Int]
+    @State private var selectedItem: Int?
+    @State private var selected: Bool?
+    var currentItem: Int? {
+        selectedItem
+    }
+    
+    init(items: [Int]) {
+        self.items = items
+        selectedItem = items.first
+    }
+    
+    var body: some View {
+        HStack {
+            ForEach(items, id: \.self) { item in
+                Item(selected: selectedItem == item && selected ?? false) {
+                    Text("\(item)")
+                }
+                .onTapGesture {
+                    if selectedItem == item {
+                        selected = false
+                        selectedItem = nil
+                    } else {
+                        selected = true
+                        selectedItem = item
+                    }
+                }
+            }
+        }
+    }
+}
+
+
 //MARK: - Row Things
 
 struct Row: View {
     @State private var currentSelectionIndex: Int?
-    @State private var selected = false
+    @State private var selected: Bool?
     private var isDark: Bool
     
     init(currentRow: [Int?], isDark: Bool = false) {
@@ -50,7 +85,7 @@ struct Row: View {
         HStack {
             Grid(compared: [Compared](repeating: .samePosition, count: 4))
             ForEach(0..<currentRow.count, id: \.self) { index in
-                Item(selected: selected && currentSelectionIndex == index, isDark: isDark) {
+                Item(selected: selected ?? false && currentSelectionIndex == index, isDark: isDark) {
                     Text(currentRow[index] != nil ? "\(currentRow[index]!)" : "")
                 }
                 .padding()
@@ -83,8 +118,11 @@ struct Item<Content: View>: View {
             .overlay(
                 content
             )
-            .font(.system(size: 30, weight: selected ? .bold : .medium))
+            .font(.system(size: fontSize, weight: selected ? .bold : .medium))
     }
+    
+    //MARK: Item Drawing Constants
+    private let fontSize: CGFloat = 30
 }
 
 //MARK: - Comparison Things
