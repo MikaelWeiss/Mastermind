@@ -13,14 +13,22 @@ struct MastermindGameView: View {
     var body: some View {
         VStack {
             Row(currentRow: viewModel.finalRow, isDark: true).disabled(true)
-            ScrollView(showsIndicators: false) {
+            ScrollView(.vertical, showsIndicators: false) {
                 VStack(spacing: 10) {
                     ForEach(0..<viewModel.allRows.count, id: \.self) { index in
                         Row(currentRow: viewModel.allRows[index])
                     }
                 }
             }
-            SelectionBar(items: viewModel.options)
+            HStack {
+                CircleButton() { }
+                
+                ScrollView(.horizontal, showsIndicators: false) {
+                    SelectionBar(items: viewModel.options)
+                }
+                
+                CircleButton() { }
+            }
         }
     }
 }
@@ -28,6 +36,21 @@ struct MastermindGameView: View {
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
         MastermindGameView(viewModel: MastermindGameIntVM(numberOfColumns: 4, numberOfRows: 10, options: [1, 2, 3, 4, 5, 6]))
+    }
+}
+
+//MARK: - Buttons
+
+struct CircleButton: View {
+    var action: () -> Void
+    
+    var body: some View {
+        Button(action: {
+            action()
+        }) {
+            Circle()
+                .frame(width: 44, height: 44)
+        }
     }
 }
 
