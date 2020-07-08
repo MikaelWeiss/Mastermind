@@ -32,15 +32,15 @@ struct MastermindGame<ObjectInEachRow> where ObjectInEachRow: Equatable {
         allRows[row].changeItemObjectFor(index: column, to: newItem)
     }
     
-    func compareIfFinalRowIsEqualToRow(at row: Int) -> [compared]? {
+    func compareIfFinalRowIsEqualToRow(at row: Int) -> [Compared]? {
         if row > allRows.count - 1 || row < allRows.count - 1 { return nil }
-        var temp = [compared]()
+        var temp = [Compared]()
         for index in 0..<numberOfColumns {
             if allRows[row].items[index] == finalRow.items[index] {
-                temp.append(compared.samePosition)
+                temp.append(Compared.samePosition)
             } else {
                 if finalRow.items.contains(allRows[row].items[index]) {
-                    temp.append(compared.inScopeButNotSamePosition)
+                    temp.append(Compared.inScopeButNotSamePosition)
                 }
             }
         }

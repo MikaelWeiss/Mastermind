@@ -44,7 +44,7 @@ class MastermindGameIntVM: ObservableObject {
         model.setFinalRowFor(items: items)
     }
     
-    func compareIfFinalRowIsEqualToRow(at row: Int) -> [compared]? {
+    func compareIfFinalRowIsEqualToRow(at row: Int) -> [Compared]? {
         model.compareIfFinalRowIsEqualToRow(at: row)
     }
     

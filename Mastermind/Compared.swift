@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum compared {
+enum Compared {
     case samePosition
     case inScopeButNotSamePosition
 }
