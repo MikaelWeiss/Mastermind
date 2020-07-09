@@ -19,7 +19,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // This delegate does not imply the connecting scene or session are new (see `application:configurationForConnectingSceneSession` instead).
 
         // Create the SwiftUI view that provides the window contents.
-        let contentView = MastermindGameView(viewModel: MastermindGameIntVM(numberOfColumns: 4, numberOfRows: 4, options: [1, 2, 3, 4, 5, 6]))
+        let contentView = MastermindGameView(viewModel: MastermindGameIntVM(numberOfColumns: 4, numberOfRows: 10, options: [1, 2, 3, 4, 5, 6,7,8,9]))
 
         // Use a UIHostingController as window root view controller.
         if let windowScene = scene as? UIWindowScene {

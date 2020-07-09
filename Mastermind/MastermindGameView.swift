@@ -9,6 +9,12 @@ import SwiftUI
 
 struct MastermindGameView: View {
     @ObservedObject var viewModel: MastermindGameIntVM
+    let selectionBar: SelectionBar
+    
+    init(viewModel: MastermindGameIntVM) {
+        selectionBar = SelectionBar(items: viewModel.options)
+        self.viewModel = viewModel
+    }
     
     var body: some View {
         VStack {
@@ -23,9 +29,15 @@ struct MastermindGameView: View {
             HStack {
                 CircleButton() { }
                 
-                ScrollView(.horizontal, showsIndicators: false) {
-                    SelectionBar(items: viewModel.options)
+                GeometryReader { geo in
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        selectionBar
+                            .if(CGFloat(viewModel.options.count * 35) < geo.size.width) {
+                                $0.frame(width: geo.size.width)
+                            }
+                    }
                 }
+                .frame(height: 44)
                 
                 CircleButton() { }
             }
@@ -35,7 +47,9 @@ struct MastermindGameView: View {
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
-        MastermindGameView(viewModel: MastermindGameIntVM(numberOfColumns: 4, numberOfRows: 10, options: [1, 2, 3, 4, 5, 6]))
+        Group {
+            MastermindGameView(viewModel: MastermindGameIntVM(numberOfColumns: 4, numberOfRows: 10, options: [1, 2, 3, 4, 5, 6,7,8,9]))
+        }
     }
 }
 
@@ -70,7 +84,7 @@ struct SelectionBar: View {
     }
     
     var body: some View {
-        HStack {
+        HStack(spacing: itemSpacing) {
             ForEach(items, id: \.self) { item in
                 Item(selected: selectedItem == item && selected ?? false) {
                     Text("\(item)")
@@ -87,6 +101,8 @@ struct SelectionBar: View {
             }
         }
     }
+    //MARK: SelectionBar Drawing Constants
+    private let itemSpacing: CGFloat = 5
 }
 
 
@@ -143,12 +159,16 @@ struct Item<Content: View>: View {
         Image(systemName: isDark ? "circle.fill" : "circle")
             .overlay(
                 content
+                    .font(.system(size: contentFontSize, weight: selected ? .bold : .medium, design: .rounded))
             )
-            .font(.system(size: fontSize, weight: selected ? .bold : .medium))
+            .font(.system(size: circleFontSize, weight: selected ? .bold : .medium))
     }
     
     //MARK: Item Drawing Constants
-    private let fontSize: CGFloat = 30
+    private let circleFontSize: CGFloat = 30
+    private var contentFontSize: CGFloat {
+        circleFontSize - 5
+    }
 }
 
 //MARK: - Comparison Things
@@ -185,5 +205,34 @@ struct Comparison: View {
                 compared == Compared.inScopeButNotSamePosition ? "circle.fill" :
                 "circle"
         )
+    }
+}
+
+
+struct ConditionalModifierView<Content: View>: View {
+    let content: Content
+    let condition: Bool
+    
+    init(condition: Bool, @ViewBuilder content: () -> Content) {
+        self.content = content()
+        self.condition = condition
+    }
+    
+    var body: some View {
+        if condition {
+            return content
+        } else {
+            return content
+        }
+    }
+}
+
+extension View {
+   func `if`<Content: View>(_ conditional: Bool, content: (Self) -> Content) -> some View {
+        if conditional {
+            return AnyView(content(self))
+        } else {
+            return AnyView(self)
+        }
     }
 }
