@@ -18,11 +18,11 @@ struct MastermindGameView: View {
     
     var body: some View {
         VStack {
-            Row(currentRow: viewModel.finalRow, isDark: true).disabled(true)
+            Row(currentRow: viewModel.finalRow, isDark: true, actionOnTap: {}).disabled(true)
             ScrollView(.vertical, showsIndicators: false) {
                 VStack(spacing: 10) {
                     ForEach(0..<viewModel.allRows.count, id: \.self) { index in
-                        Row(currentRow: viewModel.allRows[index])
+                        Row(currentRow: viewModel.allRows[index], actionOnTap: {})
                     }
                 }
             }
