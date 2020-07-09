@@ -96,10 +96,12 @@ struct Row: View {
     @State private var currentSelectionIndex: Int?
     @State private var selected: Bool?
     private var isDark: Bool
+    private let actionOnTap: () -> Void
     
-    init(currentRow: [Int?], isDark: Bool = false) {
+    init(currentRow: [Int?], isDark: Bool = false, actionOnTap: @escaping () -> Void) {
         self.isDark = isDark
         self.currentRow = currentRow
+        self.actionOnTap = actionOnTap
     }
     
     var currentRow: [Int?]
@@ -119,6 +121,7 @@ struct Row: View {
                         selected = true
                     }
                     currentSelectionIndex = index
+                    actionOnTap()
                 }
             }
         }
