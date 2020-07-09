@@ -39,7 +39,6 @@ struct MastermindGameView: View {
                 }
                 .frame(height: 44)
                 
-                
                 CircleButton() { }
             }
         }
