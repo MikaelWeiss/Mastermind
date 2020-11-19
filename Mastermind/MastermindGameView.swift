@@ -7,22 +7,31 @@
 
 import SwiftUI
 
+//Switch to something more similar to the "calendar view"
+//Ie. rebuild view.
+
 struct MastermindGameView: View {
     @ObservedObject var viewModel: MastermindGameIntVM
-    let selectionBar: SelectionBar
+    private let selectionBar: SelectionBar
+    private var selectionOptions: [[Bool]]
+    @State private var selectedItem: Int?
+    private var selectedItemRetreval: Int? {
+        selectedItem
+    }
     
     init(viewModel: MastermindGameIntVM) {
-        selectionBar = SelectionBar(items: viewModel.options)
         self.viewModel = viewModel
+        selectionBar = SelectionBar(items: viewModel.options)
+        selectionOptions = [[Bool]](repeating: [Bool](repeating: false, count: viewModel.finalRow.count), count: viewModel.allRows.count)
     }
     
     var body: some View {
         VStack {
-            Row(currentRow: viewModel.finalRow, isDark: true, actionOnTap: {}).disabled(true)
+            Row(currentRow: viewModel.finalRow, isDark: true, actionOnTap: { return nil }).disabled(true)
             ScrollView(.vertical, showsIndicators: false) {
                 VStack(spacing: 10) {
                     ForEach(0..<viewModel.allRows.count, id: \.self) { index in
-                        Row(currentRow: viewModel.allRows[index], actionOnTap: {})
+                        Row(currentRow: self.viewModel.allRows[index], actionOnTap: { return self.selectedItem })
                     }
                 }
             }
@@ -31,13 +40,17 @@ struct MastermindGameView: View {
                 
                 GeometryReader { geo in
                     ScrollView(.horizontal, showsIndicators: false) {
-                        selectionBar
-                            .if(CGFloat(viewModel.options.count * 35) < geo.size.width) {
+                        self.selectionBar
+                            .if(CGFloat(self.viewModel.options.count * 35) < geo.size.width) {
                                 $0.frame(width: geo.size.width)
                             }
+                        .frame(height: geo.size.height)
+                        .onTapGesture {
+                            self.selectedItem = self.selectionBar.currentItem
+                        }
                     }
                 }
-                .frame(height: 44)
+                .frame(height: 50)
                 
                 CircleButton() { }
             }
@@ -61,7 +74,7 @@ struct CircleButton: View {
     
     var body: some View {
         Button(action: {
-            action()
+            self.action()
         }) {
             Circle()
                 .frame(width: 44, height: 44)
@@ -87,16 +100,16 @@ struct SelectionBar: View {
     var body: some View {
         HStack(spacing: itemSpacing) {
             ForEach(items, id: \.self) { item in
-                Item(selected: selectedItem == item && selected ?? false) {
+                Item(selected: self.selectedItem == item && self.selected ?? false) {
                     Text("\(item)")
                 }
                 .onTapGesture {
-                    if selectedItem == item {
-                        selected = false
-                        selectedItem = nil
+                    if self.selectedItem == item {
+                        self.selected = false
+                        self.selectedItem = nil
                     } else {
-                        selected = true
-                        selectedItem = item
+                        self.selected = true
+                        self.selectedItem = item
                     }
                 }
             }
@@ -113,35 +126,38 @@ struct Row: View {
     @State private var currentSelectionIndex: Int?
     @State private var selected: Bool?
     private var isDark: Bool
-    private let actionOnTap: () -> Void
+    private let actionOnTap: () -> Int?
+    private var currentRow: [Int?]
     
-    init(currentRow: [Int?], isDark: Bool = false, actionOnTap: @escaping () -> Void) {
+    init(currentRow: [Int?], isDark: Bool = false, actionOnTap: @escaping () -> Int?) {
         self.isDark = isDark
         self.currentRow = currentRow
         self.actionOnTap = actionOnTap
     }
     
-    var currentRow: [Int?]
-    
     var body: some View {
         HStack {
             Grid(compared: [Compared](repeating: .samePosition, count: 4))
             ForEach(0..<currentRow.count, id: \.self) { index in
-                Item(selected: selected ?? false && currentSelectionIndex == index, isDark: isDark) {
-                    Text(currentRow[index] != nil ? "\(currentRow[index]!)" : "")
+                Item(selected: self.selected ?? false && self.currentSelectionIndex == index, isDark: self.isDark) {
+                    Text(self.currentRow[index] != nil ? "\(self.currentRow[index]!)" : "")
                 }
                 .padding()
                 .onTapGesture {
-                    if currentSelectionIndex == index {
-                        selected = false
+                    if self.currentSelectionIndex == index {
+                        self.selected = false
                     } else {
-                        selected = true
+                        self.selected = true
                     }
-                    currentSelectionIndex = index
-                    actionOnTap()
+                    self.currentSelectionIndex = index
+//                    self.setItem(self.actionOnTap(), for: index)
                 }
             }
         }
+    }
+    
+    private mutating func setItem(_ item: Int?, for index: Int) {
+        self.currentRow[index] = item
     }
 }
 
